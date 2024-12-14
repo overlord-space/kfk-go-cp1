@@ -1,0 +1,8 @@
+$ kafka-topics.sh --bootstrap-server localhost:9094 --create --topic m1-project --partitions 3 --replication-factor 2
+Created topic m1-project.
+
+$ kafka-topics.sh --bootstrap-server localhost:9094 --describe --topic m1-project
+Topic: m1-project       TopicId: QFhodaRRTEiLhh8COFyj2g PartitionCount: 3       ReplicationFactor: 2    Configs:
+        Topic: m1-project       Partition: 0    Leader: 2       Replicas: 2,0   Isr: 2,0
+        Topic: m1-project       Partition: 1    Leader: 0       Replicas: 0,1   Isr: 0,1
+        Topic: m1-project       Partition: 2    Leader: 1       Replicas: 1,2   Isr: 1,2
