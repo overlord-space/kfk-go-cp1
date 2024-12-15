@@ -22,7 +22,7 @@ func CreateProducer(daemonData *DaemonSharedData) *kafka.Producer {
 
 	isRunning := true
 
-	sendMessage(producer)
+	sendMessage(producer, daemonData)
 
 	for isRunning {
 		select {
@@ -30,7 +30,7 @@ func CreateProducer(daemonData *DaemonSharedData) *kafka.Producer {
 			isRunning = false
 			continue
 		case <-time.After(time.Minute):
-			sendMessage(producer)
+			sendMessage(producer, daemonData)
 		}
 	}
 
@@ -40,7 +40,7 @@ func CreateProducer(daemonData *DaemonSharedData) *kafka.Producer {
 	return producer
 }
 
-func sendMessage(producer *kafka.Producer) {
+func sendMessage(producer *kafka.Producer, daemonData *DaemonSharedData) {
 	messageValue, err := json.Marshal(&SomeMessage{
 		Message: "Hello at " + time.Now().String(),
 	})
@@ -63,11 +63,13 @@ func sendMessage(producer *kafka.Producer) {
 
 	e := <-deliveryChan
 
-	m := e.(*kafka.Message)
-	if m.TopicPartition.Error != nil {
-		log.Printf("Сообщение не отправлено: %v\n", m.TopicPartition.Error)
+	message := e.(*kafka.Message)
+	if message.TopicPartition.Error != nil {
+		log.Printf("Сообщение не отправлено: %v\n", message.TopicPartition.Error)
 	} else {
-		log.Printf("Сообщение отправлено на %v\n", m.TopicPartition)
+		log.Printf("Сообщение отправлено на %v\n", message.TopicPartition)
+
+		daemonData.PushChannel <- message
 	}
 
 	close(deliveryChan)

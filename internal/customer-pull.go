@@ -51,10 +51,10 @@ func CreatePullCustomer(daemonData *DaemonSharedData) {
 			if err != nil {
 				log.Printf("[pull] Не удалось десериализовать сообщение: %s\n", err)
 			} else {
-				log.Printf("[pull] Получено сообщение: %v\n", messageValue)
+				log.Printf("[pull][json] Получено сообщение: %v\n", messageValue)
 			}
 		default:
-			log.Printf("[pull] Получено событие другого типа: %v\n", event)
+			//log.Printf("[pull] Получено событие другого типа: %v\n", event)
 		}
 	}
 
