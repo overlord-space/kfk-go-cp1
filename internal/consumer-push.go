@@ -12,6 +12,7 @@ func CreatePushConsumer(daemonData *DaemonSharedData) {
 		"group.id":           "push-example-group",
 		"auto.offset.reset":  "earliest",
 		"session.timeout.ms": 6000,
+		"enable.auto.commit": false,
 	}
 
 	consumer, err := kafka.NewConsumer(&consumerConfig)

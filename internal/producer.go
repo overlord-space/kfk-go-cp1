@@ -8,8 +8,11 @@ import (
 )
 
 func CreateProducer(daemonData *DaemonSharedData) *kafka.Producer {
+	//goland:noinspection SpellCheckingInspection
 	producerConfig := kafka.ConfigMap{
 		"bootstrap.servers": BootstrapServers,
+		"acks":              "all",
+		"retries":           3,
 	}
 
 	producer, err := kafka.NewProducer(&producerConfig)
