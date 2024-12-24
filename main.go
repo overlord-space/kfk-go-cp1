@@ -25,6 +25,7 @@ func main() {
 	go func() {
 		err := internal.CreateProducer(&daemonData)
 		if err != nil {
+			log.Print(err)
 			close(exitSystemSignal)
 		}
 	}()
@@ -34,12 +35,14 @@ func main() {
 	go func() {
 		err := internal.CreatePullCustomer(&daemonData)
 		if err != nil {
+			log.Print(err)
 			close(exitSystemSignal)
 		}
 	}()
 	go func() {
 		err := internal.CreatePushConsumer(&daemonData)
 		if err != nil {
+			log.Print(err)
 			close(exitSystemSignal)
 		}
 	}()
