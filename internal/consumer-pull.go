@@ -54,7 +54,6 @@ func CreatePullCustomer(daemonData *DaemonSharedData) {
 				log.Printf("[pull][json] Получено сообщение: %v\n", messageValue)
 			}
 		default:
-			//log.Printf("[pull] Получено событие другого типа: %v\n", event)
 		}
 	}
 
