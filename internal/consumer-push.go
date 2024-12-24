@@ -53,6 +53,7 @@ func CreatePushConsumer(daemonData *DaemonSharedData) error {
 		}
 	}
 
+	log.Print("[push] Завершение работы консьюмера")
 	daemonData.WaitGroup.Done()
 	return nil
 }

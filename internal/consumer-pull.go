@@ -59,7 +59,7 @@ func CreatePullCustomer(daemonData *DaemonSharedData) error {
 		}
 	}
 
-	log.Printf("[pull] Завершение работы консьюмера\n")
+	log.Print("[pull] Завершение работы консьюмера")
 	err = consumer.Close()
 	if err != nil {
 		log.Printf("Не удалось завершить работу консьюмера: %s\n", err)
