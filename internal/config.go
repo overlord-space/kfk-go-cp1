@@ -1,8 +1,22 @@
 package internal
 
-const (
-	BootstrapServers = "localhost:9094"
+import (
+	"github.com/joho/godotenv"
+	"log"
+	"os"
 )
 
-// TopicName Пришлось вынести из констант, так как newProducer требует передачи указателя на переменную
-var TopicName = "m1-project"
+var BootstrapServers string
+var TopicName string
+
+func init() {
+	log.Print("Initializing config")
+	err := godotenv.Load()
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	BootstrapServers = os.Getenv("BOOTSTRAP_SERVERS")
+	TopicName = os.Getenv("TOPIC_NAME")
+}
