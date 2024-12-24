@@ -2,12 +2,14 @@ package internal
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"log"
 	"time"
 )
 
-func CreateProducer(daemonData *DaemonSharedData) *kafka.Producer {
+func CreateProducer(daemonData *DaemonSharedData) error {
 	//goland:noinspection SpellCheckingInspection
 	producerConfig := kafka.ConfigMap{
 		"bootstrap.servers": BootstrapServers,
@@ -17,15 +19,24 @@ func CreateProducer(daemonData *DaemonSharedData) *kafka.Producer {
 
 	producer, err := kafka.NewProducer(&producerConfig)
 	if err != nil {
-		log.Fatalf("Не удалось создать продюсера: %s\n", err)
+		return errors.New(
+			fmt.Sprintf("Не удалось создать продюсера: %s\n", err),
+		)
 	}
-	defer producer.Close()
+
+	defer func() {
+		producer.Flush(int(time.Minute.Milliseconds()))
+		producer.Close()
+	}()
 
 	log.Printf("Продюсер создан %v\n", producer)
 
 	isRunning := true
 
-	sendMessage(producer, daemonData)
+	err = sendMessage(producer, daemonData)
+	if err != nil {
+		return err
+	}
 
 	for isRunning {
 		select {
@@ -33,22 +44,27 @@ func CreateProducer(daemonData *DaemonSharedData) *kafka.Producer {
 			isRunning = false
 			continue
 		case <-time.After(time.Minute):
-			sendMessage(producer, daemonData)
+			err := sendMessage(producer, daemonData)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
 	log.Printf("Завершение работы продюсера\n")
 	daemonData.WaitGroup.Done()
 
-	return producer
+	return nil
 }
 
-func sendMessage(producer *kafka.Producer, daemonData *DaemonSharedData) {
+func sendMessage(producer *kafka.Producer, daemonData *DaemonSharedData) error {
 	messageValue, err := json.Marshal(&SomeMessage{
 		Message: "Hello at " + time.Now().String(),
 	})
 	if err != nil {
-		log.Fatalf("Не удалось сериализовать сообщение: %s\n", err)
+		return errors.New(
+			fmt.Sprintf("Не удалось сериализовать сообщение: %s\n", err),
+		)
 	}
 
 	deliveryChan := make(chan kafka.Event)
@@ -61,7 +77,7 @@ func sendMessage(producer *kafka.Producer, daemonData *DaemonSharedData) {
 		Value: messageValue,
 	}, deliveryChan)
 	if err != nil {
-		log.Fatalf("Не удалось отправить сообщение: %s\n", err)
+		return errors.New(fmt.Sprintf("Не удалось отправить сообщение: %s\n", err))
 	}
 
 	e := <-deliveryChan
@@ -76,4 +92,5 @@ func sendMessage(producer *kafka.Producer, daemonData *DaemonSharedData) {
 	}
 
 	close(deliveryChan)
+	return nil
 }

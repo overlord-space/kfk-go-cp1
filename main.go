@@ -22,12 +22,27 @@ func main() {
 
 	daemonData.WaitGroup.Add(3)
 
-	go internal.CreateProducer(&daemonData)
+	go func() {
+		err := internal.CreateProducer(&daemonData)
+		if err != nil {
+			close(exitSystemSignal)
+		}
+	}()
 	time.Sleep(time.Second * 5)
 	log.Printf("\n")
 
-	go internal.CreatePullCustomer(&daemonData)
-	go internal.CreatePushConsumer(&daemonData)
+	go func() {
+		err := internal.CreatePullCustomer(&daemonData)
+		if err != nil {
+			close(exitSystemSignal)
+		}
+	}()
+	go func() {
+		err := internal.CreatePushConsumer(&daemonData)
+		if err != nil {
+			close(exitSystemSignal)
+		}
+	}()
 
 	<-exitSystemSignal
 	log.Printf("Получен сигнал завершения работы\n")

@@ -2,13 +2,15 @@ package internal
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"log"
 )
 
 const pollTimeoutMs = 100
 
-func CreatePullCustomer(daemonData *DaemonSharedData) {
+func CreatePullCustomer(daemonData *DaemonSharedData) error {
 	consumerConfig := kafka.ConfigMap{
 		"bootstrap.servers":  BootstrapServers,
 		"group.id":           "pull-example-group",
@@ -18,14 +20,14 @@ func CreatePullCustomer(daemonData *DaemonSharedData) {
 
 	consumer, err := kafka.NewConsumer(&consumerConfig)
 	if err != nil {
-		log.Fatalf("Не удалось создать консьюмера: %s\n", err)
+		return errors.New(fmt.Sprintf("[pull] Не удалось создать консьюмера: %s\n", err))
 	}
 
 	log.Printf("[pull] Консьюмер создан %v\n", consumer)
 
 	err = consumer.SubscribeTopics([]string{TopicName}, nil)
 	if err != nil {
-		log.Fatalf("Не удалось подписаться на топик: %s\n", err)
+		return errors.New(fmt.Sprintf("[pull] Не удалось подписаться на топик: %s\n", err))
 	}
 
 	isRunning := true
@@ -62,5 +64,7 @@ func CreatePullCustomer(daemonData *DaemonSharedData) {
 	if err != nil {
 		log.Printf("Не удалось завершить работу консьюмера: %s\n", err)
 	}
+
 	daemonData.WaitGroup.Done()
+	return nil
 }
